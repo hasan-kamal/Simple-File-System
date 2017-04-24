@@ -30,8 +30,14 @@ typedef struct{
 typedef struct{
 	int id;
 	int size;
+	char *file_name;
 	int data_block_index; //pointer to block containing corresponding user-data
 } inode;
+
+typedef struct{
+	int num_inodes;
+	inode inodes[MAX_NUM_INODES];
+} all_inodes;
 
 void display_superblock(superblock *s){
 	printf("num_bytes:%d\n", s->num_bytes);
@@ -61,4 +67,12 @@ void display_inode(inode *n){
 	printf("inode id: %d\n", n->id);
 	printf("inode size: %d\n", n->size);
 	printf("inode data_block_index: %d\n", n->data_block_index);
+	printf("inode file_name: %s\n", n->file_name);
+}
+
+void display_all_inodes(all_inodes *a){
+	printf("num_all_inodes: %d\n", a->num_inodes);
+	for(int i=0; i<a->num_inodes; i++){
+		display_inode(&(a->inodes[i]));
+	}
 }
