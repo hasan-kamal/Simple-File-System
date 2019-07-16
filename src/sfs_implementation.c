@@ -20,6 +20,7 @@ int min(int x, int y){
 	return x<y?x:y;
 }
 
+// returns the num. of bytes read and read them into a buffer pointed by block
 int read_data(int disk, int block_num, void *block, int num_bytes){
 	if(disk<0 || disk>=counter){
 		printf("invalid id\n");
@@ -36,6 +37,7 @@ int read_data(int disk, int block_num, void *block, int num_bytes){
 	return BLOCK_SIZE;
 }
 
+// writes data in the block to the disk block blockNum
 int write_data(int disk, int block_num, void *block, int num_bytes){
 	if(disk<0 || disk>=counter){
 		printf("invalid id\n");
@@ -63,6 +65,7 @@ int write_data(int disk, int block_num, void *block, int num_bytes){
 	return BLOCK_SIZE;
 }
 
+// creates a file sytsem and returns a file system id
 int create_sfs(char *filename, int n_bytes){
 	filesystems[counter++] = strdup(filename);
 
@@ -115,6 +118,7 @@ int create_sfs(char *filename, int n_bytes){
 	return counter-1;
 }
 
+// returns the data stored by the given file name
 int read_file(int disk, char *file_name, void *block){
 	// return <0 value if invalid input
 	if(disk<0 || disk>=counter){
@@ -146,6 +150,7 @@ int read_file(int disk, char *file_name, void *block){
 	return -1;
 }
 
+// write the buffer pointed by block
 int write_file(int disk, char *file_name, void *block_to_write, int num_bytes_to_write){
 	if(disk<0 || disk>=counter){
 		printf("invalid id\n");
@@ -209,6 +214,7 @@ int write_file(int disk, char *file_name, void *block_to_write, int num_bytes_to
 	return -1;
 }
 
+// prints all the files in the file system
 void print_file_list(int disk){
 	// return <0 value if invalid input
 	if(disk<0 || disk>=counter){
@@ -256,6 +262,7 @@ void print_inode_list(int file_system_id){
 	display_all_inodes(&ai);
 }
 
+// prints the bitmaps of inodes
 void print_inode_bitmaps(int file_system_id){
 	if(file_system_id<0 || file_system_id>=counter){
 		printf("invalid id\n");
@@ -272,6 +279,7 @@ void print_inode_bitmaps(int file_system_id){
 	display_imap(&im);
 }
 
+// prints the bitmaps of data block
 void print_data_bitmaps(int file_system_id){
 	if(file_system_id<0 || file_system_id>=counter){
 		printf("invalid id\n");
