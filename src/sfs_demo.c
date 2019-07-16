@@ -1,6 +1,6 @@
 /*
 
-@author Luv Sharma (2015051), Hasan Kamal(2015039)
+@author Luv Sharma, Hasan Kamal
 This source demonstrates the high-level usage of our Simple File System's implementation
 
 */

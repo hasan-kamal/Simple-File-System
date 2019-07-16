@@ -1,6 +1,6 @@
 /*
 
-@author Luv Sharma (2015051), Hasan Kamal(2015039)
+@author Luv Sharma, Hasan Kamal
 This source is the low-level implementation of our Simple File System
 
 */
@@ -9,8 +9,8 @@ This source is the low-level implementation of our Simple File System
 #include <string.h>
 #include <stdlib.h>
 #include "sfs_structures.c"
-#define BLOCK_SIZE 4*1024 //4KB
-#define FILE_NUM_BYTES 1024*1024 //1024KB
+#define BLOCK_SIZE 4*1024 // 4KB
+#define FILE_NUM_BYTES 1024*1024 // 1024KB
 #define MAX_NUM_FILESYSTEMS 10
 
 int counter = 0;
@@ -28,7 +28,7 @@ int read_data(int disk, int block_num, void *block, int num_bytes){
 
 	FILE* f = fopen(filesystems[disk], "r");
 
-	//read specific block
+	// read specific block
 	fseek(f, block_num*BLOCK_SIZE, SEEK_SET);
 	fread(block, num_bytes, 1, f);
 	
@@ -42,7 +42,7 @@ int write_data(int disk, int block_num, void *block, int num_bytes){
 		return -1;
 	}
 
-	//read all data
+	// read all data
 	FILE* f_all = fopen(filesystems[disk], "r");
 	void *all_data;
 	if(f_all!=NULL){
@@ -52,7 +52,7 @@ int write_data(int disk, int block_num, void *block, int num_bytes){
 		remove(filesystems[disk]);
 	}
 
-	//write into a new temp file
+	// write into a new temp file
 	FILE *f = fopen(filesystems[disk], "w");
 	if(f_all!=NULL)
 		fwrite(all_data, FILE_NUM_BYTES, 1, f);
@@ -66,20 +66,20 @@ int write_data(int disk, int block_num, void *block, int num_bytes){
 int create_sfs(char *filename, int n_bytes){
 	filesystems[counter++] = strdup(filename);
 
-	//FILE* f = fopen(filename, "w");
+	// FILE* f = fopen(filename, "w");
 
-	// //write superblock
+	// // write superblock
 	// fseek(f, 0, SEEK_SET);
 	// superblock s = {.num_bytes=n_bytes, .imap_block_index=1, .d_map_block_index=2, .inodes_start_block=3, .data_start_block=4};
 	// fwrite(&s, sizeof(s), 1, f);
 	
-	// //write imap
+	// // write imap
 	// fseek(f, s.imap_block_index*BLOCK_SIZE, SEEK_SET);
 	// int num_inodes = min((int) (BLOCK_SIZE/sizeof(inode)), MAX_NUM_INODES);
 	// imap im = {.num_inodes=num_inodes, .is_allocated={0}};
 	// fwrite(&im, sizeof(im), 1, f);
 
-	// //write dmap
+	// // write dmap
 	// fseek(f, s.d_map_block_index*BLOCK_SIZE, SEEK_SET);
 	// int num_data_blocks = min((int) (n_bytes/BLOCK_SIZE - 4), MAX_NUM_DATA_BLOCKS);
 	// dmap dm = {.num_data_blocks=num_data_blocks, .is_allocated={0}};
@@ -87,21 +87,21 @@ int create_sfs(char *filename, int n_bytes){
 
 	// fclose(f);
 
-	//write superblock
+	// write superblock
 	superblock s = {.num_bytes=n_bytes, .imap_block_index=1, .d_map_block_index=2, .inodes_start_block=3, .data_start_block=4};
 	write_data(counter-1, 0, &s, sizeof(s));
 
-	//write imap
+	// write imap
 	int num_inodes = min((int) (BLOCK_SIZE/sizeof(inode)), MAX_NUM_INODES);
 	imap im = {.num_inodes=num_inodes, .is_allocated={0}};
 	write_data(counter-1, s.imap_block_index, &im, sizeof(im));
 	
-	//write dmap
+	// write dmap
 	int num_data_blocks = min((int) (n_bytes/BLOCK_SIZE - 4), MAX_NUM_DATA_BLOCKS);
 	dmap dm = {.num_data_blocks=num_data_blocks, .is_allocated={0}};
 	write_data(counter-1, s.d_map_block_index, &dm, sizeof(dm));
 
-	//write inodes block
+	// write inodes block
 	all_inodes all_in;
 	all_in.num_inodes = num_inodes;
 	for(int i=0; i<num_inodes; i++){
@@ -116,27 +116,27 @@ int create_sfs(char *filename, int n_bytes){
 }
 
 int read_file(int disk, char *file_name, void *block){
-	//return <0 value if invalid input
+	// return <0 value if invalid input
 	if(disk<0 || disk>=counter){
 		printf("invalid id\n");
 		return -1;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(disk, 0, &s, sizeof(s));
 	
-	//read imap
+	// read imap
 	imap im;
 	read_data(disk, s.imap_block_index, &im, sizeof(im));
 	
-	//read all inodes
+	// read all inodes
 	all_inodes ai;
 	read_data(disk, s.inodes_start_block, &ai, sizeof(ai));
 	
 	for(int i=0; i<ai.num_inodes; i++){
 		if((im.is_allocated[i]==1)&&(strcmp(ai.inodes[i].file_name, file_name)==0)){
-			//file found
+			// file found
 			read_data(disk, s.data_start_block+ai.inodes[i].data_block_index, block, BLOCK_SIZE);
 			return 1;
 		}
@@ -152,50 +152,50 @@ int write_file(int disk, char *file_name, void *block_to_write, int num_bytes_to
 		return -1;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(disk, 0, &s, sizeof(s));
 	
-	//read imap
+	// read imap
 	imap im;
 	read_data(disk, s.imap_block_index, &im, sizeof(im));
 	
-	//read dmap
+	// read dmap
 	dmap dm;
 	read_data(disk, s.d_map_block_index, &dm, sizeof(dm));
 	
-	//read all inodes
+	// read all inodes
 	all_inodes ai;
 	read_data(disk, s.inodes_start_block, &ai, sizeof(ai));
 	
 	for(int i=0; i<ai.num_inodes; i++){
 		if((im.is_allocated[i]==1)&&(strcmp(ai.inodes[i].file_name, file_name)==0)){
-			//existing file, overwrite contents
+			// existing file, overwrite contents
 			write_data(disk, s.data_start_block+ai.inodes[i].data_block_index, block_to_write, num_bytes_to_write);
 			return 1;
 		}
 	}
 
-	//did not match, so allocate a new inode instead
+	// did not match, so allocate a new inode instead
 	for(int i=0; i<ai.num_inodes; i++){
 		if(im.is_allocated[i]==0){
-			im.is_allocated[i] = 1; //mark allocated
+			im.is_allocated[i] = 1; // mark allocated
 
-			//find an unallocated datablock
+			// find an unallocated datablock
 			int x;
 			for(x=0; x<MAX_NUM_DATA_BLOCKS; x++){
 				if(dm.is_allocated[x]==0){
-					dm.is_allocated[x] = 1; //mark allocated
+					dm.is_allocated[x] = 1; // mark allocated
 					break;
 				}
 			}
 
 			ai.inodes[i].file_name = strdup(file_name);
 			ai.inodes[i].size = 1;
-			ai.inodes[i].data_block_index = x; //points to xth datablock
+			ai.inodes[i].data_block_index = x; // points to xth datablock
 
-			//propagate all changes to disk
-			//write_data(disk, 0, &s, sizeof(s));
+			// propagate all changes to disk
+			// write_data(disk, 0, &s, sizeof(s));
 			write_data(disk, s.imap_block_index, &im, sizeof(im));
 			write_data(disk, s.d_map_block_index, &dm, sizeof(dm));
 			write_data(disk, s.inodes_start_block, &ai, sizeof(ai));
@@ -210,21 +210,21 @@ int write_file(int disk, char *file_name, void *block_to_write, int num_bytes_to
 }
 
 void print_file_list(int disk){
-	//return <0 value if invalid input
+	// return <0 value if invalid input
 	if(disk<0 || disk>=counter){
 		printf("invalid id\n");
 		return;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(disk, 0, &s, sizeof(s));
 	
-	//read imap
+	// read imap
 	imap im;
 	read_data(disk, s.imap_block_index, &im, sizeof(im));
 	
-	//read all inodes
+	// read all inodes
 	all_inodes ai;
 	read_data(disk, s.inodes_start_block, &ai, sizeof(ai));
 	
@@ -246,11 +246,11 @@ void print_inode_list(int file_system_id){
 		return;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(file_system_id, 0, &s, sizeof(s));
 	
-	//read all inodes list
+	// read all inodes list
 	all_inodes ai;
 	read_data(file_system_id, s.inodes_start_block, &ai, sizeof(ai));
 	display_all_inodes(&ai);
@@ -262,11 +262,11 @@ void print_inode_bitmaps(int file_system_id){
 		return;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(file_system_id, 0, &s, sizeof(s));
 	
-	//read imap
+	// read imap
 	imap im;
 	read_data(file_system_id, s.imap_block_index, &im, sizeof(im));
 	display_imap(&im);
@@ -278,11 +278,11 @@ void print_data_bitmaps(int file_system_id){
 		return;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(file_system_id, 0, &s, sizeof(s));
 	
-	//read dmap
+	// read dmap
 	dmap dm;
 	read_data(file_system_id, s.d_map_block_index, &dm, sizeof(dm));
 	display_dmap(&dm);
@@ -294,7 +294,7 @@ void print_superblock(int file_system_id){
 		return;
 	}
 
-	//read superblock
+	// read superblock
 	superblock s;
 	read_data(file_system_id, 0, &s, sizeof(s));
 	display_superblock(&s);

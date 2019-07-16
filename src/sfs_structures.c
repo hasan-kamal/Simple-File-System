@@ -1,6 +1,6 @@
 /*
 
-@author Luv Sharma (2015051), Hasan Kamal(2015039)
+@author Luv Sharma, Hasan Kamal
 This source contains the structure definitions used by this filesystem
 
 */
@@ -8,7 +8,7 @@ This source contains the structure definitions used by this filesystem
 #define MAX_NUM_INODES 20
 #define MAX_NUM_DATA_BLOCKS 20
 
-//superblock definition
+// superblock definition
 typedef struct{
 	int num_bytes;
 	int imap_block_index;
@@ -31,7 +31,7 @@ typedef struct{
 	int id;
 	int size;
 	char *file_name;
-	int data_block_index; //pointer to block containing corresponding user-data
+	int data_block_index; // pointer to block containing corresponding user-data
 } inode;
 
 typedef struct{
@@ -50,7 +50,7 @@ void display_superblock(superblock *s){
 void display_imap(imap *im){
 	printf("num_inodes:%d\n", im->num_inodes);
 	for(int i=0; i<im->num_inodes; i++){
-		//if(im->is_allocated[i])
+		// if(im->is_allocated[i])
 			printf("index_inode:%d is_allocated:%d\n", i, im->is_allocated[i]);
 	}
 }
@@ -58,7 +58,7 @@ void display_imap(imap *im){
 void display_dmap(dmap *dm){
 	printf("num_data_blocks:%d\n", dm->num_data_blocks);
 	for(int i=0; i<dm->num_data_blocks; i++){
-		//if(dm->is_allocated[i])
+		// if(dm->is_allocated[i])
 			printf("index_dblock:%d is_allocated:%d\n", i, dm->is_allocated[i]);
 	}
 }
